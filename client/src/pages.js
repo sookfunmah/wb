@@ -1,0 +1,14 @@
+export { default as ErrorPage } from './pages/ErrorPage';
+export { default as Home } from './pages/Home';
+export { default as PostDetail } from './pages/PostDetail';
+export { default as Register } from './pages/Register';
+export { default as Login } from './pages/Login';
+export { default as Authors } from './pages/Authors';
+export { default as CreatePost } from './pages/CreatePost';
+export { default as EditPosts } from './pages/EditPosts';
+export { default as CategoryPosts } from './pages/CategoryPosts';
+export { default as AuthorPosts } from './pages/AuthorPosts';
+export { default as Dashboard } from './pages/Dashboard';
+export { default as Logout } from './pages/Logout';
+export { default as UserProfile } from './pages/UserProfile';
+export { default as DeletePost } from './pages/DeletePost';
