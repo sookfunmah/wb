@@ -129,7 +129,6 @@ const editPost = async (req, res, next) => {
       return next(new HttpError("Fill in all fields"), 422);
     }
 
-<<<<<<< HEAD
     //get oldPost from database
     const oldPost = await Post.findById(postId);
     if (req.user.id == oldPost.creator) {
@@ -177,41 +176,6 @@ const editPost = async (req, res, next) => {
           { title, category, description, thumbnail: newFilename },
           { new: true }
         );
-=======
-    // get old post from db
-    const oldPost = await Post.findById(postID);
-
-    if(req.user.id == oldPost.creator) {
-    // update post without thumbnail
-    if(!req.files) {
-        updatedPost = await Post.findByIdAndUpdate(postID, {title, category, description}, {new: true})
-    } else {
-    // delete old thumbnail from uploads
-      fs.unlink(path.join(__dirname, '..', 'uploads', oldPost.thumbnail), async (err) => {
-    if (err) {
-        return next(new HttpError(err))
-    }})
-        
-    // upload new thumbnail
-    const {thumbnail} = req.files;
-    // check file size
-    if(thumbnail.size > 2000000) {
-        return next(new HttpError("Thumbnail too big. Should be less than 2mb"))
-    }
-    fileName = thumbnail.name;
-    let splittedFilename = fileName.split('.')
-    newFilename = splittedFilename[0] + uuid() + "." + splittedFilename[splittedFilename.length - 1]
-    
-    thumbnail.mv(path.join(__dirname, '..', 'uploads', newFilename), async (err) => {
-      if(err) {
-        return next(new HttpError(err))
-          }
-      })
-        updatedPost = await Post.findByIdAndUpdate(postID, {title, category, description, thumbnail: newFilename}, {new: true})
-        }
-      } else {
-          return next(new HttpError("Couldn't update post.", 403))
->>>>>>> 1028c2927866c9044b7b0a092cde33fee6ac759d
       }
     }
     //File upload completed, update post
@@ -219,15 +183,7 @@ const editPost = async (req, res, next) => {
       return next(new HttpError("Couldn't update post", 400));
     }
 
-<<<<<<< HEAD
     res.status(200).json(updatedPost);
-=======
-      if(!updatedPost) {
-          return next(new HttpError("Couldn't update post", 400))
-      }
-      res.json(updatedPost)
-
->>>>>>> 1028c2927866c9044b7b0a092cde33fee6ac759d
   } catch (error) {
       return next(new HttpError(error))
   }
