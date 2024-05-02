@@ -13,6 +13,14 @@ const app = express();
 app.use(express.json({extended:true}))
 app.use(express.urlencoded({extended:true}))
 //app.use(cors({credentials:true, origin: "http://localhost:3000"}))
+
+const corsOptions = {
+    origin: 'https://wbfront-qfxzbl7l8-sook-funs-projects.vercel.app',
+    credentials: true // Enable credentials (e.g., cookies) in cross-origin requests
+};
+app.use(cors(corsOptions));
+
+
 app.use(upload())
 app.use('/uploads', express.static(__dirname + '/uploads'))
 
