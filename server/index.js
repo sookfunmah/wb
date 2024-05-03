@@ -13,7 +13,7 @@ const app = express();
 
 // CORS configuration
 const allowedOrigins = [
-    'https://yourfrontenddomain.com',
+    'https://wbfront-sook-funs-projects.vercel.app',
     'http://localhost:3000' // Allow requests from your local development environment
   ];
   
