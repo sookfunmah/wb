@@ -28,6 +28,12 @@ const allowedOrigins = [
     }
   }));
 
+  //CHeck in vercel
+  app.get("/api/hello",(req,res)=>{
+    res.json({
+        message:"Hello World"
+    })
+  })
 
 
 app.use(express.json({extended:true}))
