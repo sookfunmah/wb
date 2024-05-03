@@ -25,7 +25,8 @@ const allowedOrigins = [
       } else {
         callback(new Error('Not allowed by CORS'));
       }
-    }
+    },
+    credentials: true
   }));
 
   //CHeck in vercel
