@@ -21,9 +21,12 @@ const allowedOrigins = [
     credentials: true,
     origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
+        console.log('Request Allowed:', true);
         callback(null, true);
       } else {
+        console.log('Request Allowed:', false);
         callback(new Error('Not allowed by CORS'));
+        
       }
     },
     credentials: true
