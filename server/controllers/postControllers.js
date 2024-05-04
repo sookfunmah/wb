@@ -51,54 +51,53 @@ const { mongoose } = require('mongoose')
 // };
 
 
+
+const multer = require ('multer')
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '..', 'uploads')); // Destination folder
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, uuid() + ext); // Unique filename using UUID
+  }
+});
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 2000000 } // Limiting file size to 2MB
+}).single('thumbnail');
 const createPost = async (req, res, next) => {
   try {
-    let { title, category, description } = req.body;
-    if (!title || !category || !description || !req.files) {
-      return next(
-        new HttpError("Fill in all fields and choose a thumbnail", 422)
-      );
-    }
-
-    const { thumbnail } = req.files;
-
-    // Check file size
-    if (thumbnail.size > 2000000) {
-      return next(new HttpError(" Thumbnail too big, Max is 2Mb"));
-    }
-
-    let fileName = thumbnail.name;
-    let splittedFilename = fileName.split(".");
-    let newFilename =
-      splittedFilename[0] + uuid() + "." + splittedFilename[splittedFilename.length - 1];
-    
-    // Write the file using fs.writeFile
-    fs.writeFile(
-      path.join(__dirname, "..", "/uploads", newFilename), 
-      thumbnail.data, // Assuming 'thumbnail' contains the file data
-      async (err) => {
-        if (err) {
-          return next(new HttpError(err));
-        } else {
-          const newPost = await Post.create({title, category, description, thumbnail: newFilename, creator: req.user.id});
-          if (!newPost) {
-            return next(new HttpError("Post couldn't be created", 422));
-          }
-
-          // Find user and increase post count
-          const currentUser = await User.findById(req.user.id);
-          const userPostCount = currentUser.posts + 1;
-          await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
-
-          res.status(201).json(newPost);
-        }
+    upload(req, res, async function (err) {
+      if (err) {
+        return next(new HttpError(err.message, 422)); // Handle multer errors
       }
-    );
+      const { title, category, description } = req.body;
+      if (!title || !category || !description || !req.file) {
+        return next(new HttpError('Fill in all fields and choose a thumbnail', 422));
+      }
+      const { file: thumbnail } = req;
+      // Create new post
+      const newPost = await Post.create({
+        title,
+        category,
+        description,
+        thumbnail: thumbnail.filename,
+        creator: req.user.id
+      });
+      if (!newPost) {
+        return next(new HttpError('Post couldn\'t be created', 422));
+      }
+      // Find user and increase post count
+      const currentUser = await User.findById(req.user.id);
+      const userPostCount = currentUser.posts + 1;
+      await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
+      res.status(201).json(newPost);
+    });
   } catch (error) {
-    return next(new HttpError(error));
+    return next(new HttpError(error.message, 500)); // Handle other errors
   }
 };
-
 
 
 
