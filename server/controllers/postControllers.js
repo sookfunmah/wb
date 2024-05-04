@@ -7,6 +7,50 @@ const HttpError = require("../models/errorModel");
 const { mongoose } = require('mongoose')
 
 
+// const createPost = async (req, res, next) => {
+//   try {
+//     let { title, category, description } = req.body;
+//     if (!title || !category || !description || !req.files) {
+//       return next(
+//         new HttpError("Fill in all fields and choose a thumbnail", 422)
+//       );
+//     }
+
+//     const { thumbnail } = req.files;
+
+//     //Check file size
+//     if (thumbnail.size > 2000000) {
+//       return next(new HttpError(" Thumbnail too big, Max is 2Mb"));
+//     }
+
+//     let fileName = thumbnail.name;
+//     let splittedFilename = fileName.split(".");
+//     let newFilename =
+//       splittedFilename[0] + uuid() + "." + splittedFilename[splittedFilename.length - 1];
+//     thumbnail.mv(path.join(__dirname, "..", "/uploads", newFilename), async (err) => {
+//         if (err) {
+//           return next(new HttpError(err));
+//         } else {
+//           const newPost = await Post.create({title, category, description, thumbnail: newFilename, creator: req.user.id,});
+//           if (!newPost) {
+//             return next(new HttpError("Post couldn't be created", 422));
+//           }
+
+//           //find user and increase post count
+//           const currentUser = await User.findById(req.user.id);
+//           const userPostCount = currentUser.posts + 1;
+//           await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
+
+//           res.status(201).json(newPost);
+//         }
+//       }
+//     );
+//   } catch (error) {
+//     return next(new HttpError(error));
+//   }
+// };
+
+
 const createPost = async (req, res, next) => {
   try {
     let { title, category, description } = req.body;
@@ -18,7 +62,7 @@ const createPost = async (req, res, next) => {
 
     const { thumbnail } = req.files;
 
-    //Check file size
+    // Check file size
     if (thumbnail.size > 2000000) {
       return next(new HttpError(" Thumbnail too big, Max is 2Mb"));
     }
@@ -27,16 +71,21 @@ const createPost = async (req, res, next) => {
     let splittedFilename = fileName.split(".");
     let newFilename =
       splittedFilename[0] + uuid() + "." + splittedFilename[splittedFilename.length - 1];
-    thumbnail.mv(path.join(__dirname, "..", "/uploads", newFilename), async (err) => {
+    
+    // Write the file using fs.writeFile
+    fs.writeFile(
+      path.join(__dirname, "..", "/uploads", newFilename), 
+      thumbnail.data, // Assuming 'thumbnail' contains the file data
+      async (err) => {
         if (err) {
           return next(new HttpError(err));
         } else {
-          const newPost = await Post.create({title, category, description, thumbnail: newFilename, creator: req.user.id,});
+          const newPost = await Post.create({title, category, description, thumbnail: newFilename, creator: req.user.id});
           if (!newPost) {
             return next(new HttpError("Post couldn't be created", 422));
           }
 
-          //find user and increase post count
+          // Find user and increase post count
           const currentUser = await User.findById(req.user.id);
           const userPostCount = currentUser.posts + 1;
           await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
@@ -49,6 +98,7 @@ const createPost = async (req, res, next) => {
     return next(new HttpError(error));
   }
 };
+
 
 
 
