@@ -45,7 +45,6 @@ const createPost = async (req, res, next) => {
           res.status(201).json(newPost);
         }
       }
-    );
   } catch (error) {
     return next(new HttpError(error));
   }
