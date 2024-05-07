@@ -4,7 +4,11 @@ const authMiddleware = require('../middleware/authMiddleware')
 
 const {createPost, getPost,getPosts,getCatPosts,getUserPosts,editPost,removePost } = require("../controllers/postControllers")
 
-router.post('/', authMiddleware, createPost)
+///////////////////////////
+const upload = require("../utils/multer");
+
+
+router.post('/',authMiddleware,upload.single('thumbnail'), createPost)
 router.get('/', getPosts)
 router.get('/:id', getPost)
 router.get('/categories/:category',getCatPosts)

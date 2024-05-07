@@ -4,54 +4,63 @@ const path = require("path");
 const fs = require("fs");
 const { v4: uuid } = require("uuid");
 const HttpError = require("../models/errorModel");
-const { mongoose } = require('mongoose')
+
+const express = require('express');
+const app = express();
+
+const { mongoose } = require('mongoose');
+
+// Set up Multer 
+const multer  = require('multer');
+const upload = require("../utils/multer");
+
+
+
+//CallCloudinary//
+const cloudinary = require("../utils/cloudinary");
 
 
 const createPost = async (req, res, next) => {
   try {
     let { title, category, description } = req.body;
-    if (!title || !category || !description || !req.files) {
-      return next(
-        new HttpError("Fill in all fields and choose a thumbnail", 422)
-      );
+    if (!title || !category || !description || !req.file) {
+      return next(new HttpError("Fill in all fields and choose a thumbnail", 422));
     }
 
-    const { thumbnail } = req.files;
-
-    //Check file size
-    if (thumbnail.size > 2000000) {
-      return next(new HttpError(" Thumbnail too big, Max is 2Mb"));
+    
+    // Check file size
+    if ( thumbnail = req.file.size > 2000000) {
+      return next(new HttpError("Thumbnail too big, Max is 2Mb"));
     }
 
-    let fileName = thumbnail.name;
-    let splittedFilename = fileName.split(".");
-    let newFilename =
-      splittedFilename[0] + uuid() + "." + splittedFilename[splittedFilename.length - 1];
-      let tempraryImageDirectory
-      tempraryImageDirectory =  path.join(__dirname, "/temp/"), async (err) => {
-        if (err) {
-          return next(new HttpError(err));
-        } else {
-          const newPost = await Post.create({title, category, description, thumbnail: newFilename, creator: req.user.id,});
-          if (!newPost) {
-            return next(new HttpError("Post couldn't be created", 422));
-          }
+    // Upload thumbnail to Cloudinary
+    const cloudinaryResult = await cloudinary.uploader.upload(req.file.path);
 
-          //find user and increase post count
-          const currentUser = await User.findById(req.user.id);
-          const userPostCount = currentUser.posts + 1;
-          await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
+    if (!cloudinaryResult.secure_url) {
+      return next(new HttpError("Error uploading thumbnail to Cloudinary", 500));
+    }
 
-          res.status(201).json(newPost);
-        }
-      }
+    // Create new post with the Cloudinary URL
+    const newPost = await Post.create({
+      title,
+      category,
+      description,
+      thumbnail: cloudinaryResult.secure_url,
+      creator: req.user.id,
+    });
+
+    // Increment post count for the current user
+    //find user and increase post count
+    const currentUser = await User.findById(req.user.id);
+    const userPostCount = currentUser.posts + 1;
+    await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
+
+
+    res.status(201).json(newPost);
   } catch (error) {
     return next(new HttpError(error));
   }
 };
-
-
-
 
 
 

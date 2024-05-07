@@ -1,5 +1,5 @@
 const {Router} = require('express')
-
+const upload = require("express-fileupload");
 const {registerUser, loginUser, getAuthors,getUser,changeAvatar, editUser} = require ("../controllers/userControllers")
 
 const authMiddleware = require ('../middleware/authMiddleware')
@@ -7,7 +7,7 @@ const authMiddleware = require ('../middleware/authMiddleware')
 const router = Router()
 
 router.post('/register', registerUser)
-router.post('/login', loginUser)
+router.post('/login',upload(), loginUser)
 router.get('/:id',getUser)
 router.get('/', getAuthors)
 router.post('/change-avatar', authMiddleware, changeAvatar)

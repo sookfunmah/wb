@@ -7,6 +7,9 @@ const {v4: uuid} = require ('uuid')
 const User = require ('../models/userModel')
 const HttpError = require("../models/errorModel");
 
+
+/////////////    REGISTER NEW USER             ////////////
+//=======================================================//
 const registerUser = async (req,res, next) => {
   try{
     const {name, email, password, password2} = req.body;
@@ -36,6 +39,10 @@ const registerUser = async (req,res, next) => {
     return next (new HttpError ("User Registration Failed", 422))
   }
 }
+
+
+/////////////    LOGIN USER                    ////////////
+//=======================================================//
 
 const loginUser = async (req,res, next) => {
   try {
@@ -69,6 +76,11 @@ const loginUser = async (req,res, next) => {
   }
 }
 
+
+/////////////    GET LOGIN USER                    ////////////
+//=======================================================//
+
+
 const getUser = async (req,res, next) => {
   try {
       const {id} = req.params;
@@ -82,6 +94,9 @@ const getUser = async (req,res, next) => {
   }
 }
 
+
+/////////////    CHANGE AVATAR                   ////////////
+//=======================================================  //
 const changeAvatar = async (req,res, next) => {
   try {
     if(!req.files.avatar) {
@@ -124,6 +139,10 @@ const changeAvatar = async (req,res, next) => {
   }
 }
 
+
+/////////////    EDIT USER PROFILE                   ////////////
+//=======================================================  //
+
 const editUser = async (req,res, next) => {
   try {
     const {name, email, currentPassword, newPassword, confirmNewPassword} = req.body;
@@ -163,7 +182,7 @@ const editUser = async (req,res, next) => {
 
 const getAuthors = async(req, res,next) =>{
   try {
-    const authors=await User.find().select('-password');
+    const authors = await User.find().select('-password');
     res.json(authors);
   } catch (error) {
     return next (new HttpError(error))

@@ -56,7 +56,8 @@ const removePost = async (postId) => {
             return <article key={post._id} className='dashboard_post'>
               <div className='dashboard_post_info'>
                 <div className='dashboard_post_thumbnail'>
-                <img src={`${process.env.REACT_APP_ASSETS_URL}/uploads/${post.thumbnail}`} alt="" />
+                {/* <img src={`${process.env.REACT_APP_ASSETS_URL}/uploads/${post.thumbnail}`} alt="" /> */}
+                <img src={`${post.thumbnail}`} alt="" />
                 </div>
                 <h5>{post.title}</h5>
               </div>
