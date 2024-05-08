@@ -7,6 +7,9 @@ const {v4: uuid} = require ('uuid')
 const User = require ('../models/userModel')
 const HttpError = require("../models/errorModel");
 
+const multer  = require('multer');
+const uploadwMulter = require("../utils/multer");
+const cloudinary = require("../utils/cloudinary")
 
 /////////////    REGISTER NEW USER             ////////////
 //=======================================================//
@@ -97,49 +100,62 @@ const getUser = async (req,res, next) => {
 
 /////////////    CHANGE AVATAR                   ////////////
 //=======================================================  //
-const changeAvatar = async (req,res, next) => {
+const changeAvatar = async (req, res, next) => {
   try {
-    console.log("trying to change avatar")
-    if(!req.files.avatar) {
-      return next (new HttpError("Please upload an image", 422))
+    console.log("trying to change avatar");
+    
+    // Check if avatar file is provided
+    // if (!req.files || !req.files.avatar)
+    if (!req.file) {
+      console.log("reg file at change avatar",req.file);
+      return next(new HttpError("Please upload an image", 422));
     }
 
-    const user = await User.findById(req.user.id)
+    // Find the user in the database
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return next(new HttpError("User not found", 404));
+    }
+    console.log("Finding User Avatar ID", user)
+    // Delete old avatar from Cloudinary if exists
     if (user.avatar) {
-      fs.unlink(path.join(__dirname, '..', 'uploads',user.avatar), (err) => {
-        if (err) {
-          return next (new HttpError(err))
-        }
-      })
-    }
-    console.log("trying to change avatar after findId")
-    const {avatar} = req.files;
-    if (avatar.size > 500000) {
-      return next (new HttpError ("File Upload exceeds 500kb limit"),422)
+      await cloudinary.uploader.destroy(user.avatar);
     }
 
-    let fileName;
-    fileName = avatar.name;
+    const { avatar } = req.file
+    console.log("trying to upload new avatar",req.file);
+    // Check avatar size
+    if (!avatar.size || avatar.size > 500000) {
+      console.log("Avatarsize", avatar.size)
+      return next(new HttpError("File upload exceeds 500kb limit"), 422);
+    }
 
-    let splittedFilename = fileName.split('.')
-    let newFilename = splittedFilename[0] + uuid() + '.' + splittedFilename[splittedFilename.length - 1]
+    console.log("checking file size",avatar.size);
 
-    avatar.mv(path.join(__dirname, '..', 'uploads', newFilename),async (err) => {
-      if (err) {
-        return next (new HttpError(err))
-      }
+    // Upload new avatar to Cloudinary
+    const cloudinaryResult = await cloudinary.uploader.uploadwMulter(avatar.path);
 
-      const updatedAvatar = await User.findByIdAndUpdate(req.user.id, {avatar: newFilename}, {new: true})
-      if(!updatedAvatar){
-        return next (new HttpError("Avatar couldn't be changed",422))
-      }
-      res.status(200).json(updatedAvatar)
-    })
+    console.log("uploading avatar to cloudinary",cloudinaryResult);
+
+    // Update user with new avatar URL
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { avatar: cloudinaryResult.secure_url },
+      { new: true }
+    );
+      console.log("updated USer Success", updatedUser)
+    if (!updatedUser) {
+      return next(new HttpError("Avatar couldn't be changed", 422));
+    }
+
+    // Return updated user
+    res.status(200).json(updatedUser);
 
   } catch (error) {
-    return next (new HttpError(error))
+    return next(new HttpError(error));
   }
-}
+};
+
 
 
 /////////////    EDIT USER PROFILE                   ////////////
@@ -151,7 +167,7 @@ const editUser = async (req,res, next) => {
     if(!name || !email || !currentPassword || !newPassword){
       return next (new HttpError("Fill in all the fields", 422))
     }
-
+    console.log("req file at edit user :",req.body)
     const user = await User.findById(req.user.id);
     if(!user){
       return next (new HttpError ("User not found",403))

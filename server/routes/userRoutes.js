@@ -5,12 +5,14 @@ const {registerUser, loginUser, getAuthors,getUser,changeAvatar, editUser} = req
 const authMiddleware = require ('../middleware/authMiddleware')
 
 const router = Router()
+const uploadwMulter = require("../utils/multer");
+
 
 router.post('/register', registerUser)
 router.post('/login',upload(), loginUser)
 router.get('/:id',getUser)
 router.get('/', getAuthors)
-router.post('/change-avatar', authMiddleware, changeAvatar)
-router.patch('/edit-user', authMiddleware, editUser)
+router.post('/change-avatar',uploadwMulter.single("avatar"), authMiddleware, changeAvatar)
+router.patch('/edit-user',upload(), authMiddleware, editUser)
 
 module.exports = router

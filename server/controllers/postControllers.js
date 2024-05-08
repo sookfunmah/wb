@@ -131,16 +131,16 @@ const getUserPosts = async (req, res, next) => {
 //PROTECTED
 const editPost = async (req, res, next) => {
   try {
-    console.log("trying to EDIT")
+    
     const postId = req.params.id;
     const { title, category, description } = req.body;
 
-    console.log("trying to EDIT2")
+    
     // Check if title, category, and description are provided
-    // if (!title || !category || description.length < 12) {
+    if (!title || !category || description.length < 12) {
       
-    //   return next(new HttpError("Fill in all fields"), 422);
-    // }
+      return next(new HttpError("Fill in all fields"), 422);
+    }
 
     console.log("trying to find post")
     // Find the old post from the database
@@ -154,7 +154,7 @@ const editPost = async (req, res, next) => {
     // Check if the current user is the creator of the post
     if (req.user.id == oldPost.creator.toString()) {
 
-      console.log("if user  is ownber of pic")
+      console.log("Checking if user is owner of pic")
       let updatedPost;
   
       if (!req.file ) {
