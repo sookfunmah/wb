@@ -99,6 +99,7 @@ const getUser = async (req,res, next) => {
 //=======================================================  //
 const changeAvatar = async (req,res, next) => {
   try {
+    console.log("trying to change avatar")
     if(!req.files.avatar) {
       return next (new HttpError("Please upload an image", 422))
     }
@@ -111,6 +112,7 @@ const changeAvatar = async (req,res, next) => {
         }
       })
     }
+    console.log("trying to change avatar after findId")
     const {avatar} = req.files;
     if (avatar.size > 500000) {
       return next (new HttpError ("File Upload exceeds 500kb limit"),422)

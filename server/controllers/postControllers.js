@@ -20,6 +20,8 @@ const upload = require("../utils/multer");
 const cloudinary = require("../utils/cloudinary");
 
 
+///////////////      CREATE POST         ///////////////////
+
 const createPost = async (req, res, next) => {
   try {
     let { title, category, description } = req.body;
@@ -128,110 +130,117 @@ const getUserPosts = async (req, res, next) => {
 //PATCH: api/posts/:id
 //PROTECTED
 const editPost = async (req, res, next) => {
- 
-    let fileName;
-    let newFilename;
-    let updatedPost;
-    try { const postId = req.params.id;
-    let { title, category, description } = req.body;
+  try {
+    console.log("trying to EDIT")
+    const postId = req.params.id;
+    const { title, category, description } = req.body;
 
-    //ReactQuill has a paragraph opening and closing tag with a break tag in between so there are 11 chars in already.
+    console.log("trying to EDIT2")
+    // Check if title, category, and description are provided
+    // if (!title || !category || description.length < 12) {
+      
+    //   return next(new HttpError("Fill in all fields"), 422);
+    // }
 
-    if (!title || !category || description.length < 12) {
-      return next(new HttpError("Fill in all fields"), 422);
+    console.log("trying to find post")
+    // Find the old post from the database
+    const oldPost = await Post.findById(postId);
+    if (!oldPost) {
+      return next(new HttpError("Post not found", 404));
     }
 
-    //get oldPost from database
-    const oldPost = await Post.findById(postId);
-    if (req.user.id == oldPost.creator) {
-      if (!req.files) {
+    console.log("finish finding")
+
+    // Check if the current user is the creator of the post
+    if (req.user.id == oldPost.creator.toString()) {
+
+      console.log("if user  is ownber of pic")
+      let updatedPost;
+      if (!req.file || !req.file.thumbnail) {
+        // If no new thumbnail is provided, update post without changing the thumbnail
         updatedPost = await Post.findByIdAndUpdate(
           postId,
           { title, category, description },
           { new: true }
         );
       } else {
-        //delete old thumbnail from upload
-        fs.unlink(
-          path.join(__dirname, "..", "uploads", oldPost.thumbnail),
-          async (err) => {
-            if (err) {
-              return next(new HttpError(err));
-            }
-          }
-        );
-        //upload new thumbnail
-        const { thumbnail } = req.files;
-
-        //check file size
-        if (thumbnail.size > 2000000) {
-          return next(new HttpError("Thumbnail too big, Max is 2Mb"));
-        }
-
-        fileName = thumbnail.name;
-        let splittedFilename = fileName.split(".");
-        newFilename =
-          splittedFilename[0] +
-          uuid() +
-          "." +
-          splittedFilename[splittedFilename.length - 1];
-        thumbnail.mv(
-          path.join(__dirname, "..", "uploads", newFilename),
-          async (err) => {
-            if (err) {
-              return next(new HttpError(err));
-            }
-          }
-        );
+        // Delete old thumbnail from Cloudinary
+        await cloudinary.uploader.destroy(oldPost.thumbnail);
+  
+        // Upload new thumbnail to Cloudinary
+        const { thumbnail } = req.file;
+        console.log("thumbnail", thumbnail)
+        const cloudinaryResult = await cloudinary.uploader.upload(thumbnail.path);
+        
+        console.log("trying to EDIT6")
+        // Create new post with the updated Cloudinary URL
         updatedPost = await Post.findByIdAndUpdate(
           postId,
-          { title, category, description, thumbnail: newFilename },
+          {
+            title,
+            category,
+            description,
+            thumbnail: cloudinaryResult.secure_url,
+          },
           { new: true }
         );
       }
+      
+      // Return updated post
+      res.status(200).json(updatedPost);
+      
+    }else{
+      return next(new HttpError("You are not authorized to edit this post.", 403));
     }
-    //File upload completed, update post
-    if (!updatedPost) {
-      return next(new HttpError("Couldn't update post", 400));
-    }
-
-    res.status(200).json(updatedPost);
+    
   } catch (error) {
-      return next(new HttpError(error))
+    return next(new HttpError(error));
   }
-}
+};
 
 
 //============== DELETE POST ==================
 //DELETE: api/posts/:id
 //PROTECTED
 const removePost = async (req, res, next) => {
-
+  try {
     const postId = req.params.id;
     if (!postId) {
       return next(new HttpError("Post Unavailable"), 400);
     }
+    
     const post = await Post.findById(postId);
     const fileName = post?.thumbnail;
 
-    if (req.user.id == post.creator) {
-      //delete thumbnail from uploads folder
-      fs.unlink(path.join(__dirname, "..", "uploads", fileName), async (err) => {
-          if (err) {
-            return next(err);
-          } else {
-            await Post.findByIdAndDelete(postId);
-            //find user and reduce post count by 1
-            const currentUser = await User.findById(req.user.id);
-            const userPostCount = currentUser?.posts - 1;
-            await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
-            res.json(`Post ${postId} deleted successfully.`);
-          }
-        })
-    } else {
-        return next(new HttpError("Couldn't delete post.", 403))
+    if (!post) {
+      return next(new HttpError("Post not found", 404));
     }
+
+    if (req.user.id !== post.creator) {
+      
+       // Delete image from Cloudinary
+    await cloudinary.uploader.destroy(fileName);
+
+    // Delete post from MongoDB
+    await Post.findByIdAndDelete(postId);
+
+    // Decrement post count for the current user
+    const currentUser = await User.findById(req.user.id);
+    const userPostCount = currentUser?.posts - 1;
+    await User.findByIdAndUpdate(req.user.id, { posts: userPostCount });
+
+    res.json(`Post ${postId} and associated image deleted successfully.`);
+      
+      
+    }else{
+      return next(new HttpError("You are not authorized to delete this post.", 403));
+    }
+
+  } catch (error) {
+    return next(new HttpError(error));
+  }
 }
+
 
 module.exports = {
   createPost,

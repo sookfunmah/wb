@@ -8,12 +8,12 @@ const {createPost, getPost,getPosts,getCatPosts,getUserPosts,editPost,removePost
 const upload = require("../utils/multer");
 
 
-router.post('/',authMiddleware,upload.single('thumbnail'), createPost)
+router.post('/',upload.single('thumbnail'),authMiddleware, createPost)
 router.get('/', getPosts)
 router.get('/:id', getPost)
 router.get('/categories/:category',getCatPosts)
 router.get('/users/:id',getUserPosts)
-router.patch('/:id', authMiddleware, editPost)
+router.patch('/:id',upload.single('thumbnail'), authMiddleware, editPost)
 router.delete('/:id', authMiddleware, removePost)
 
 module.exports = router;
