@@ -150,14 +150,16 @@ const editPost = async (req, res, next) => {
     }
 
     console.log("finish finding")
-
+    console.log("req file",req.file)
     // Check if the current user is the creator of the post
     if (req.user.id == oldPost.creator.toString()) {
 
       console.log("if user  is ownber of pic")
       let updatedPost;
-      if (!req.file || !req.file.thumbnail) {
+  
+      if (!req.file ) {
         // If no new thumbnail is provided, update post without changing the thumbnail
+          console.log("updating whout pic")
         updatedPost = await Post.findByIdAndUpdate(
           postId,
           { title, category, description },
@@ -168,11 +170,11 @@ const editPost = async (req, res, next) => {
         await cloudinary.uploader.destroy(oldPost.thumbnail);
   
         // Upload new thumbnail to Cloudinary
-        const { thumbnail } = req.file;
-        console.log("thumbnail", thumbnail)
-        const cloudinaryResult = await cloudinary.uploader.upload(thumbnail.path);
+        //const { thumbnail } = req.file;
+        //console.log("thumbnail", thumbnail)
+        const cloudinaryResult = await cloudinary.uploader.upload(req.file.path);
         
-        console.log("trying to EDIT6")
+        console.log("trying to", cloudinaryResult)
         // Create new post with the updated Cloudinary URL
         updatedPost = await Post.findByIdAndUpdate(
           postId,
