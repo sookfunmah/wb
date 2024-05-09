@@ -1,10 +1,10 @@
-*Projects Goals*
+**Projects Goals**
 
 To implement a blog for students/teachers to post,edit,upload image relating from Software Engineering to Data Analytics.
 
 Click to use >> https://wb-frontend-one.vercel.app/
 
-*Install/Used Dependencies*
+**Install/Used Dependencies**
 Node.js
 MongoDb/mongoose / npm i mongoose
 Cloudinary
@@ -17,7 +17,7 @@ jsonwebtoken / npm install jsonwebtoken
 cors - npm install cors
 
 
-*Code to run Application *
+**Code to run Application**
 FrontEnd/Client - npm run start Backend/Server - npm run dev
 
 *Technology Used*
@@ -26,7 +26,7 @@ CLOUDINARY  - Used together with MondoDB, user upload their images and is stored
 VERCEL      - Deployment
 
 
-*Challenges*
+**Challenges**
  Trouble Deploying the Project on Vercel Corrs Policy Issue when connecting Front End to Back End.
  Having Difficuly stored images upload by user / used Cloudinary to overcome the issue.
 
