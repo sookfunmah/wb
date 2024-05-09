@@ -30,8 +30,8 @@ VERCEL      - Deployment
  Trouble Deploying the Project on Vercel Corrs Policy Issue when connecting Front End to Back End.
  Having Difficuly stored images upload by user / used Cloudinary to overcome the issue.
 
- 
+ HOME PAGE
 ![Alt text](photos/home.png)
+
+MEMBERS PAGE
 ![Alt text](photos/members.png)
-![Local Image](photos/home.png)
-![Local Image](photos/members.png)
