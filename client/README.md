@@ -31,5 +31,7 @@ VERCEL      - Deployment
  Having Difficuly stored images upload by user / used Cloudinary to overcome the issue.
 
  
-[Alt text](photos/home.png)
-[Alt text](photos/members.png)
+![Alt text](photos/home.png)
+![Alt text](photos/members.png)
+![Local Image](photos/home.png)
+![Local Image](photos/members.png)

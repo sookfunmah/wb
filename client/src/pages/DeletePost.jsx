@@ -11,6 +11,7 @@ const DeletePost = () => {
     const removePost = async () => {
       try {
           const response = await axios.delete(`${process.env.REACT_APP_URL}/posts/${id}`)
+          
 
       } catch (error) {
           console.log(error)
