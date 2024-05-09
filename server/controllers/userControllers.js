@@ -102,8 +102,7 @@ const getUser = async (req,res, next) => {
 //=======================================================  //
 const changeAvatar = async (req, res, next) => {
   try {
-    console.log("request",req)
-    console.log("req.file",req.file)
+    
     // Check if avatar file is provided
     // if (!req.files || !req.files.avatar)
     if (!req.file || !req.file.filename) {
@@ -122,8 +121,7 @@ const changeAvatar = async (req, res, next) => {
     }
 
     const  avatar  = req.file
-    console.log("trying to upload new avatar",req.file);
-    console.log("trying to upload new avatar",avatar);
+   
     // Check avatar size
     if (!avatar.size || avatar.size > 500000) {
       console.log("Avatarsize", avatar.size)
