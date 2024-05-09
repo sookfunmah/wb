@@ -33,7 +33,8 @@ const Authors = () => {
            {authors.map(author => {
             return <Link key={author?._id} to={`/posts/users/${author?._id}`} className='author'>
               <div className='authors_avatar'>
-                <img src={`${process.env.REACT_APP_ASSETS_URL}/uploads/${author.avatar}`} alt={`Image of ${author?.name}`} />
+                {/* <img src={`${process.env.REACT_APP_ASSETS_URL}/uploads/${author.avatar}`} alt={`Image of ${author?.name}`} /> */}
+                <img src={`${author.avatar}`} alt={`Image of ${author?.name}`} />
               </div>
               <div  className='authors_info'>
                 <h4>{author?.name}</h4>

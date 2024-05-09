@@ -42,7 +42,7 @@ const loginUser = async (e) => {
         <form className='form login_form' onSubmit={loginUser}>
           {error && <p className='form_error_message'> {error}</p>}
           <input type= "text" placeholder='Email' name= "email" value={userData.email} onChange={changeInputHandler} autoFocus />
-          <input type= "text" placeholder='Password' name= "password" value={userData.password} onChange={changeInputHandler} />    
+          <input type= "password" placeholder='Password' name= "password" value={userData.password} onChange={changeInputHandler} />    
           <button type= "submit" className='btn primary'>Login</button>
           </form>
         <small>Don't have an account? <Link to = "/register">Sign Up</Link></small>
