@@ -102,15 +102,14 @@ const getUser = async (req,res, next) => {
 //=======================================================  //
 const changeAvatar = async (req, res, next) => {
   try {
-    console.log("trying to change avatar");
-    
+    console.log("request",req)
+    console.log("req.file",req.file)
     // Check if avatar file is provided
     // if (!req.files || !req.files.avatar)
-    if (!req.file) {
+    if (!req.file || !req.file.filename) {
       console.log("reg file at change avatar",req.file);
       return next(new HttpError("Please upload an image", 422));
     }
-
     // Find the user in the database
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -122,8 +121,9 @@ const changeAvatar = async (req, res, next) => {
       await cloudinary.uploader.destroy(user.avatar);
     }
 
-    const { avatar } = req.file
+    const  avatar  = req.file
     console.log("trying to upload new avatar",req.file);
+    console.log("trying to upload new avatar",avatar);
     // Check avatar size
     if (!avatar.size || avatar.size > 500000) {
       console.log("Avatarsize", avatar.size)
@@ -133,7 +133,7 @@ const changeAvatar = async (req, res, next) => {
     console.log("checking file size",avatar.size);
 
     // Upload new avatar to Cloudinary
-    const cloudinaryResult = await cloudinary.uploader.uploadwMulter(avatar.path);
+    const cloudinaryResult = await cloudinary.uploader.upload(req.file.path);
 
     console.log("uploading avatar to cloudinary",cloudinaryResult);
 

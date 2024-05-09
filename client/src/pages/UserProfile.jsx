@@ -47,6 +47,7 @@ const UserProfile = () => {
             postData.set('avatar', avatar);
             const response = await axios.post(`${process.env.REACT_APP_URL}/users/change-avatar`, postData, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}})
             setAvatar(response?.data.avatar)
+            console.log("SetAvatarTouched updated avatar",avatar)
         } catch (error) {
             setError(error.response.data.message)
             console.log(error)
@@ -81,7 +82,7 @@ const UserProfile = () => {
         <div className='profile_details'>
           <div className='avatar_wrapper'>
             <div className='profile_avatar'>
-            <img src={`${process.env.REACT_APP_ASSETS_URL}/uploads/${avatar}`} alt="" />
+            <img src={avatar} alt="" />
             </div>
             {/*Form */}
             <form className='avatar_form'>
